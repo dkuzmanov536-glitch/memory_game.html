@@ -2,109 +2,156 @@
 <html lang="bg">
 <head>
 <meta charset="UTF-8">
-<title>Игри.com</title>
+<title>Игри</title>
+
 <style>
-body { font-family: Arial; text-align: center; margin: 0; }
-nav { background: #333; padding: 10px; }
-nav button { margin: 5px; padding: 10px; color: white; background: #555; border: none; cursor: pointer; }
-section { display: none; padding: 20px; }
-.active { display: block; }
-.card { width: 60px; height: 60px; display: inline-block; margin: 5px;
-        background: gray; font-size: 30px; line-height: 60px; cursor: pointer; }
+body {
+  font-family: Arial;
+  text-align: center;
+  margin: 0;
+  background: #f4f4f4;
+}
+
+nav {
+  background: #222;
+  padding: 10px;
+}
+
+nav button {
+  margin: 5px;
+  padding: 10px 15px;
+  color: white;
+  background: #444;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+nav button:hover {
+  background: #666;
+}
+
+section {
+  display: none;
+  padding: 20px;
+}
+
+.active {
+  display: block;
+}
+
+.card {
+  width: 60px;
+  height: 60px;
+  display: inline-block;
+  margin: 5px;
+  background: #888;
+  font-size: 30px;
+  line-height: 60px;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+h1, h2 {
+  color: #333;
+}
 </style>
 </head>
+
 <body>
 
 <nav>
-<button onclick="show('home')">Начало</button>
-<button onclick="show('game')">Игри</button>
-<button onclick="show('score')">Рекорди</button>
+<button onclick="покажи('начало')">Начало</button>
+<button onclick="покажи('игра')">Игри</button>
+<button onclick="покажи('рекорди')">Рекорди</button>
 </nav>
 
-<section id="home" class="active">
-<h1>Добре дошъл в Игри.com 🎮</h1>
-<p>Избери "Игри" за да започнеш!</p>
+<section id="начало" class="active">
+<h1>Добре дошъл 🎮</h1>
+<p>Избери „Игри“, за да започнеш!</p>
 </section>
 
-<section id="game">
-<h2>Игра за памет 🃏</h2>
-<div id="board"></div>
-<p id="result"></p>
+<section id="игра">
+<h2>Игра за памет 🧠</h2>
+<div id="поле"></div>
+<p id="резултат"></p>
 </section>
 
-<section id="score">
-<h2>Рекорди 🏆</h2>
-<p id="best">Няма рекорд</p>
+<section id="рекорди">
+<h2>Най-добри резултати 🏆</h2>
+<p id="найДобър">Все още няма рекорд</p>
 </section>
 
 <script>
-function show(id) {
-  document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+function покажи(име) {
+  document.querySelectorAll("section").forEach(секция => секция.classList.remove("active"));
+  document.getElementById(име).classList.add("active");
 }
 
-// MEMORY GAME
-let cards = ["🍎","🍎","🍌","🍌","🍇","🍇","🍒","🍒"];
-cards.sort(() => 0.5 - Math.random());
+// ИГРА ЗА ПАМЕТ
+let карти = ["🍎","🍎","🍌","🍌","🍇","🍇","🍒","🍒"];
+карти.sort(() => 0.5 - Math.random());
 
-let first = null;
-let second = null;
-let lock = false;
-let moves = 0;
+let първа = null;
+let втора = null;
+let заключено = false;
+let ходове = 0;
 
-const board = document.getElementById("board");
+const поле = document.getElementById("поле");
 
-cards.forEach((emoji, i) => {
-  let div = document.createElement("div");
-  div.className = "card";
-  div.dataset.value = emoji;
-  div.onclick = () => flip(div);
-  board.appendChild(div);
+карти.forEach((символ, индекс) => {
+  let карта = document.createElement("div");
+  карта.className = "card";
+  карта.dataset.стойност = символ;
+  карта.onclick = () => обърни(карта);
+  поле.appendChild(карта);
 });
 
-function flip(card) {
-  if (lock || card.textContent) return;
+function обърни(карта) {
+  if (заключено || карта.textContent) return;
 
-  card.textContent = card.dataset.value;
+  карта.textContent = карта.dataset.стойност;
 
-  if (!first) {
-    first = card;
+  if (!първа) {
+    първа = карта;
   } else {
-    second = card;
-    lock = true;
-    moves++;
+    втора = карта;
+    заключено = true;
+    ходове++;
 
-    if (first.dataset.value === second.dataset.value) {
-      first = second = null;
-      lock = false;
-      checkWin();
+    if (първа.dataset.стойност === втора.dataset.стойност) {
+      първа = null;
+      втора = null;
+      заключено = false;
+      провериПобеда();
     } else {
       setTimeout(() => {
-        first.textContent = "";
-        second.textContent = "";
-        first = second = null;
-        lock = false;
+        първа.textContent = "";
+        втора.textContent = "";
+        първа = null;
+        втора = null;
+        заключено = false;
       }, 800);
     }
   }
 }
 
-function checkWin() {
-  if ([...document.querySelectorAll(".card")].every(c => c.textContent)) {
-    document.getElementById("result").textContent = "Победи за " + moves + " хода!";
-    
-    let best = localStorage.getItem("best");
-    if (!best || moves < best) {
-      localStorage.setItem("best", moves);
-      document.getElementById("best").textContent = "Най-добър: " + moves;
+function провериПобеда() {
+  if ([...document.querySelectorAll(".card")].every(к => к.textContent)) {
+    document.getElementById("резултат").textContent = "Победи за " + ходове + " хода!";
+
+    let найДобър = localStorage.getItem("рекорд");
+    if (!найДобър || ходове < найДобър) {
+      localStorage.setItem("рекорд", ходове);
+      document.getElementById("найДобър").textContent = "Най-добър резултат: " + ходове;
     }
   }
 }
 
-// LOAD SCORE
-let best = localStorage.getItem("best");
-if (best) {
-  document.getElementById("best").textContent = "Най-добър: " + best;
+// ЗАРЕЖДАНЕ НА РЕКОРДА
+let найДобър = localStorage.getItem("рекорд");
+if (найДобър) {
+  document.getElementById("найДобър").textContent = "Най-добър резултат: " + найДобър;
 }
 </script>
 
