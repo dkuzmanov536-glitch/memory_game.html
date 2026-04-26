@@ -5,24 +5,11 @@
 <title>Игри.com</title>
 
 <style>
-body {
-  font-family: Arial;
-  margin: 0;
-  background: #f0f0f0;
-  text-align: center;
-}
+body { font-family: Arial; margin: 0; text-align: center; background: #f0f0f0; }
 
-header {
-  background: #222;
-  color: white;
-  padding: 15px;
-  font-size: 24px;
-}
+header { background: #222; color: white; padding: 15px; font-size: 24px; }
 
-nav {
-  background: #444;
-  padding: 10px;
-}
+nav { background: #444; padding: 10px; display: none; }
 
 nav button {
   margin: 5px;
@@ -33,20 +20,10 @@ nav button {
   cursor: pointer;
 }
 
-section {
-  display: none;
-  padding: 20px;
-}
+section { display: none; padding: 20px; }
+.active { display: block; }
 
-.active {
-  display: block;
-}
-
-input {
-  padding: 8px;
-  margin: 5px;
-  width: 200px;
-}
+input { padding: 8px; margin: 5px; width: 200px; }
 
 .card {
   width: 60px;
@@ -63,31 +40,31 @@ input {
 
 <body>
 
-<header>Игри.com 🎮</header>
+<header id="заглавие">Игри.com 🎮</header>
 
+<!-- ВХОД -->
 <section id="вход" class="active">
 <h2>Вход</h2>
 
-<p>Имейл адрес:</p>
-<input type="text"><br>
+<input id="име" placeholder="Въведи име"><br>
+<input type="password" placeholder="Парола"><br>
 
-<p>Парола:</p>
-<input type="password"><br>
-
-<p style="color:blue; cursor:pointer;">Забравена парола?</p>
+<p style="color:blue;">Забравена парола?</p>
 <p>Нямаш профил? <span style="color:blue;">Регистрирай се</span></p>
 
 <button onclick="влез()">Влез</button>
 </section>
 
-<nav>
+<!-- МЕНЮ -->
+<nav id="меню">
 <button onclick="покажи('начало')">Начало</button>
-<button onclick="покажи('игра')">Игра</button>
+<button onclick="покажи('игра')">Играй</button>
 <button onclick="покажи('рекорди')">Рекорди</button>
 </nav>
 
+<!-- СТРАНИЦИ -->
 <section id="начало">
-<h2>Начало</h2>
+<h2 id="приветствие"></h2>
 <p>Добре дошъл в Игри.com!</p>
 </section>
 
@@ -103,13 +80,26 @@ input {
 </section>
 
 <script>
+// ВХОД
+function влез() {
+  let име = document.getElementById("име").value;
+  if (!име) {
+    alert("Въведи име!");
+    return;
+  }
+
+  document.getElementById("вход").style.display = "none";
+  document.getElementById("меню").style.display = "block";
+
+  document.getElementById("приветствие").textContent = "Здравей, " + име + " 👋";
+
+  покажи("начало");
+}
+
+// НАВИГАЦИЯ
 function покажи(id) {
   document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
-}
-
-function влез() {
-  покажи('начало');
 }
 
 // ИГРА
@@ -162,16 +152,19 @@ function обърни(карта) {
 
 function провери() {
   if ([...document.querySelectorAll(".card")].every(к => к.textContent)) {
-    document.getElementById("резултат").textContent = "Победи за " + ходове + " хода!";
+    document.getElementById("резултат").textContent =
+      "Победи за " + ходове + " хода!";
 
     let рекорд = localStorage.getItem("рекорд");
     if (!рекорд || ходове < рекорд) {
       localStorage.setItem("рекорд", ходове);
-      document.getElementById("найДобър").textContent = "Най-добър: " + ходове;
+      document.getElementById("найДобър").textContent =
+        "Най-добър: " + ходове;
     }
   }
 }
 
+// ЗАРЕЖДАНЕ НА РЕКОРД
 let рекорд = localStorage.getItem("рекорд");
 if (рекорд) {
   document.getElementById("найДобър").textContent = "Най-добър: " + рекорд;
