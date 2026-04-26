@@ -1,175 +1,28 @@
-<!DOCTYPE html>
-<html lang="bg">
-<head>
-<meta charset="UTF-8">
-<title>Игри.com</title>
-
-<style>
-body { font-family: Arial; margin: 0; text-align: center; background: #f0f0f0; }
-
-header { background: #222; color: white; padding: 15px; font-size: 24px; }
-
-nav { background: #444; padding: 10px; display: none; }
-
-nav button {
-  margin: 5px;
-  padding: 10px;
-  border: none;
-  background: #666;
-  color: white;
-  cursor: pointer;
+<div class="fruit-box" id="box"></div>
+<style>.fruit-box {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  width: 300px;
+  margin: auto;
 }
 
-section { display: none; padding: 20px; }
-.active { display: block; }
+.fruit {
+  aspect-ratio: 1 / 1;
+  font-size: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: white;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+}<script>const fruits = ["🍎", "🍌", "🍇", "🍉", "🍒", "🍑"];
 
-input { padding: 8px; margin: 5px; width: 200px; }
+const box = document.getElementById("box");
 
-.card {
-  width: 60px;
-  height: 60px;
-  background: gray;
-  display: inline-block;
-  margin: 5px;
-  font-size: 30px;
-  line-height: 60px;
-  cursor: pointer;
-}
-</style>
-</head>
-
-<body>
-
-<header id="заглавие">Игри.com 🎮</header>
-
-<!-- ВХОД -->
-<section id="вход" class="active">
-<h2>Вход</h2>
-
-<input id="име" placeholder="Въведи име"><br>
-<input type="password" placeholder="Парола"><br>
-
-<p style="color:blue;">Забравена парола?</p>
-<p>Нямаш профил? <span style="color:blue;">Регистрирай се</span></p>
-
-<button onclick="влез()">Влез</button>
-</section>
-
-<!-- МЕНЮ -->
-<nav id="меню">
-<button onclick="покажи('начало')">Начало</button>
-<button onclick="покажи('игра')">Играй</button>
-<button onclick="покажи('рекорди')">Рекорди</button>
-</nav>
-
-<!-- СТРАНИЦИ -->
-<section id="начало">
-<h2 id="приветствие"></h2>
-<p>Добре дошъл в Игри.com!</p>
-</section>
-
-<section id="игра">
-<h2>Игра за памет</h2>
-<div id="поле"></div>
-<p id="резултат"></p>
-</section>
-
-<section id="рекорди">
-<h2>Рекорди</h2>
-<p id="найДобър">Няма рекорд</p>
-</section>
-
-<script>
-// ВХОД
-function влез() {
-  let име = document.getElementById("име").value;
-  if (!име) {
-    alert("Въведи име!");
-    return;
-  }
-
-  document.getElementById("вход").style.display = "none";
-  document.getElementById("меню").style.display = "block";
-
-  document.getElementById("приветствие").textContent = "Здравей, " + име + " 👋";
-
-  покажи("начало");
-}
-
-// НАВИГАЦИЯ
-function покажи(id) {
-  document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
-
-// ИГРА
-let карти = ["🍎","🍎","🍌","🍌","🍇","🍇","🍒","🍒"];
-карти.sort(() => 0.5 - Math.random());
-
-let първа = null;
-let втора = null;
-let заключено = false;
-let ходове = 0;
-
-const поле = document.getElementById("поле");
-
-карти.forEach(символ => {
-  let карта = document.createElement("div");
-  карта.className = "card";
-  карта.dataset.стойност = символ;
-  карта.onclick = () => обърни(карта);
-  поле.appendChild(карта);
+fruits.forEach(fruit => {
+  const div = document.createElement("div");
+  div.className = "fruit";
+  div.textContent = fruit;
+  box.appendChild(div);
 });
-
-function обърни(карта) {
-  if (заключено || карта.textContent) return;
-
-  карта.textContent = карта.dataset.стойност;
-
-  if (!първа) {
-    първа = карта;
-  } else {
-    втора = карта;
-    заключено = true;
-    ходове++;
-
-    if (първа.dataset.стойност === втора.dataset.стойност) {
-      първа = null;
-      втора = null;
-      заключено = false;
-      провери();
-    } else {
-      setTimeout(() => {
-        първа.textContent = "";
-        втора.textContent = "";
-        първа = null;
-        втора = null;
-        заключено = false;
-      }, 800);
-    }
-  }
-}
-
-function провери() {
-  if ([...document.querySelectorAll(".card")].every(к => к.textContent)) {
-    document.getElementById("резултат").textContent =
-      "Победи за " + ходове + " хода!";
-
-    let рекорд = localStorage.getItem("рекорд");
-    if (!рекорд || ходове < рекорд) {
-      localStorage.setItem("рекорд", ходове);
-      document.getElementById("найДобър").textContent =
-        "Най-добър: " + ходове;
-    }
-  }
-}
-
-// ЗАРЕЖДАНЕ НА РЕКОРД
-let рекорд = localStorage.getItem("рекорд");
-if (рекорд) {
-  document.getElementById("найДобър").textContent = "Най-добър: " + рекорд;
-}
-</script>
-
-</body>
-</html>
