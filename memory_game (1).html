@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Игра на Памет 🃏</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0d0d1a;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: Georgia, serif;
+    color: #eee;
+    padding: 16px;
+  }
+  h1 { font-size: 22px; margin-bottom: 6px; letter-spacing: 2px; color: #c9a96e; }
+  .hdr { display: flex; gap: 20px; font-size: 13px; color: #888; margin-bottom: 14px; }
+  .hdr b { color: #eee; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    width: 100%;
+    max-width: 320px;
+  }
+  .card {
+    aspect-ratio: 1;
+    border: 1px solid #333;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    background: #1a1a2e;
+    transition: all 0.2s;
+    user-select: none;
+    min-width: 0;
+  }
+  .card:not(.flipped):not(.matched) { font-size: 0; background: #16213e; border-color: #2a2a4a; }
+  .card:not(.flipped):not(.matched):hover { border-color: #c9a96e; background: #1e1e3a; }
+  .card.flipped { background: #2a1a4a; border-color: #9b59b6; }
+  .card.matched { background: #1a3a2a; border-color: #2ecc71; opacity: 0.7; cursor: default; }
+  .win { font-size: 15px; color: #c9a96e; text-align: center; min-height: 22px; margin-top: 4px; }
+  .rbtn {
+    margin-top: 12px;
+    padding: 9px 24px;
+    border: 1px solid #c9a96e;
+    background: transparent;
+    color: #c9a96e;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: Georgia, serif;
+    transition: all 0.15s;
+  }
+  .rbtn:hover { background: #c9a96e22; }
+</style>
+</head>
+<body>
+  <h1>🃏 Памет</h1>
+  <div class="hdr">Двойки: <b id="mp">0/8</b> &nbsp; Ходове: <b id="mm">0</b></div>
+  <div class="grid" id="mg"></div>
+  <div class="win" id="mw"></div>
+  <button class="rbtn" onclick="mInit()">↺ Нова игра</button>
+
+<script>
+const EM = ['🦇','🕷️','💀','🔑','🪓','👁️','🕯️','🪦'];
+let mc, mf, matched, moves;
+
+function mInit() {
+  const p = [...EM, ...EM].sort(() => Math.random() - 0.5);
+  mf = []; matched = 0; moves = 0;
+  mc = p.map((e, i) => ({ e, id: i, fl: false, ma: false }));
+  document.getElementById('mp').textContent = '0/8';
+  document.getElementById('mm').textContent = '0';
+  document.getElementById('mw').textContent = '';
+  const g = document.getElementById('mg'); g.innerHTML = '';
+  mc.forEach((c, i) => {
+    const d = document.createElement('div');
+    d.className = 'card'; d.dataset.i = i; d.textContent = c.e;
+    d.onclick = () => mFlip(i); g.appendChild(d);
+  });
+}
+
+function mFlip(i) {
+  const c = mc[i];
+  if (c.fl || c.ma || mf.length >= 2) return;
+  c.fl = true;
+  const el = document.querySelector(`[data-i="${i}"]`);
+  el.classList.add('flipped'); el.textContent = c.e;
+  mf.push(i);
+  if (mf.length === 2) {
+    moves++; document.getElementById('mm').textContent = moves;
+    const [a, b] = mf;
+    if (mc[a].e === mc[b].e) {
+      mc[a].ma = mc[b].ma = true;
+      document.querySelector(`[data-i="${a}"]`).classList.add('matched');
+      document.querySelector(`[data-i="${b}"]`).classList.add('matched');
+      matched++; document.getElementById('mp').textContent = matched + '/8';
+      mf = [];
+      if (matched === 8) document.getElementById('mw').textContent = '🎉 Победа за ' + moves + ' хода!';
+    } else {
+      setTimeout(() => {
+        [a, b].forEach(x => {
+          mc[x].fl = false;
+          const el = document.querySelector(`[data-i="${x}"]`);
+          el.classList.remove('flipped'); el.textContent = '';
+        });
+        mf = [];
+      }, 800);
+    }
+  }
+}
+
+mInit();
+</script>
+</body>
+</html>
