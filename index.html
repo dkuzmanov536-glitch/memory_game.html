@@ -11,13 +11,20 @@ body {
   background: #f2f2f2;
 }
 
-h1 {
-  margin-top: 15px;
+#login {
+  margin-top: 100px;
 }
 
-.info {
-  margin: 10px;
+input {
+  padding: 10px;
   font-size: 18px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 18px;
+  margin-top: 10px;
+  cursor: pointer;
 }
 
 .board {
@@ -26,6 +33,7 @@ h1 {
   gap: 10px;
   justify-content: center;
   margin-top: 20px;
+  display: none;
 }
 
 .card {
@@ -39,12 +47,16 @@ h1 {
   align-items: center;
   cursor: pointer;
   border-radius: 10px;
-  user-select: none;
 }
 
 .card.flipped {
   background: white;
   color: black;
+}
+
+.info {
+  display: none;
+  margin-top: 10px;
 }
 
 .win {
@@ -57,93 +69,121 @@ h1 {
 
 <body>
 
-<h1>🧠 Memory Game</h1>
-
-<div class="info">
-⏱ Време: <span id="time">0</span> сек |
-🎯 Ходове: <span id="moves">0</span>
+<!-- 👤 ВХОД -->
+<div id="login">
+  <h2>🎮 Въведи име</h2>
+  <input id="name" placeholder="Име..." />
+  <br>
+  <button onclick="start()">Играй</button>
 </div>
 
+<!-- 📊 ИНФО -->
+<div class="info" id="info">
+  👤 Играч: <span id="player"></span> |
+  ⏱ Време: <span id="time">0</span> |
+  🎯 Ходове: <span id="moves">0</span>
+</div>
+
+<!-- 🎮 ИГРА -->
 <div class="board" id="board"></div>
 
 <div class="win" id="win"></div>
 
 <script>
-const emojis = ["🍎","🍌","🍇","🍉","🍒","🍑","🍍","🥝"];
-let cards = [...emojis, ...emojis];
-cards.sort(() => Math.random() - 0.5);
+let playerName = "";
 
-const board = document.getElementById("board");
-const timeEl = document.getElementById("time");
-const movesEl = document.getElementById("moves");
-const winEl = document.getElementById("win");
+function start() {
+  const name = document.getElementById("name").value;
 
-let first = null;
-let second = null;
-let lock = false;
-let moves = 0;
-let matched = 0;
-let time = 0;
-let started = false;
+  if (name === "") {
+    alert("Въведи име!");
+    return;
+  }
 
-// ⏱ таймер
-setInterval(() => {
-  if (started) {
+  playerName = name;
+
+  document.getElementById("login").style.display = "none";
+  document.getElementById("info").style.display = "block";
+  document.getElementById("board").style.display = "grid";
+
+  document.getElementById("player").textContent = playerName;
+
+  initGame();
+}
+
+// 🎮 играта
+function initGame() {
+
+  const emojis = ["🍎","🍌","🍇","🍉","🍒","🍑","🍍","🥝"];
+  let cards = [...emojis, ...emojis];
+  cards.sort(() => Math.random() - 0.5);
+
+  const board = document.getElementById("board");
+  const timeEl = document.getElementById("time");
+  const movesEl = document.getElementById("moves");
+  const winEl = document.getElementById("win");
+
+  let first = null;
+  let second = null;
+  let lock = false;
+  let moves = 0;
+  let matched = 0;
+  let time = 0;
+
+  setInterval(() => {
     time++;
     timeEl.textContent = time;
-  }
-}, 1000);
+  }, 1000);
 
-// създаване на карти
-cards.forEach(emoji => {
-  const card = document.createElement("div");
-  card.className = "card";
-  card.dataset.emoji = emoji;
-  card.textContent = "";
+  cards.forEach(emoji => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.textContent = "";
 
-  card.addEventListener("click", () => {
-    if (lock || card.classList.contains("flipped")) return;
+    card.dataset.emoji = emoji;
 
-    if (!started) started = true;
+    card.addEventListener("click", () => {
+      if (lock || card.classList.contains("flipped")) return;
 
-    card.classList.add("flipped");
-    card.textContent = emoji;
+      card.classList.add("flipped");
+      card.textContent = emoji;
 
-    if (!first) {
-      first = card;
-    } else {
-      second = card;
-      lock = true;
-      moves++;
-      movesEl.textContent = moves;
-
-      if (first.dataset.emoji === second.dataset.emoji) {
-        matched += 2;
-        first = null;
-        second = null;
-        lock = false;
-
-        if (matched === cards.length) {
-          winEl.textContent = "🎉 Победи! Браво!";
-          started = false;
-        }
-
+      if (!first) {
+        first = card;
       } else {
-        setTimeout(() => {
-          first.classList.remove("flipped");
-          second.classList.remove("flipped");
-          first.textContent = "";
-          second.textContent = "";
+        second = card;
+        lock = true;
+
+        moves++;
+        movesEl.textContent = moves;
+
+        if (first.dataset.emoji === second.dataset.emoji) {
+          matched += 2;
           first = null;
           second = null;
           lock = false;
-        }, 700);
-      }
-    }
-  });
 
-  board.appendChild(card);
-});
+          if (matched === cards.length) {
+            winEl.textContent = "🎉 Победи " + playerName + "!";
+          }
+
+        } else {
+          setTimeout(() => {
+            first.classList.remove("flipped");
+            second.classList.remove("flipped");
+            first.textContent = "";
+            second.textContent = "";
+            first = null;
+            second = null;
+            lock = false;
+          }, 700);
+        }
+      }
+    });
+
+    board.appendChild(card);
+  });
+}
 </script>
 
 </body>
